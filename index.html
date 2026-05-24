@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A vintage-inspired engineering portfolio with page turns, typed reveals, and paper textures." />
+  <title>Portfolio — Your Name</title>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+
+<div id="sndviz">
+  <div class="sbar" id="s1"></div>
+  <div class="sbar" id="s2"></div>
+  <div class="sbar" id="s3"></div>
+  <div class="sbar" id="s4"></div>
+  <div class="sbar" id="s5"></div>
+</div>
+
+<nav id="navbar">
+  <a class="nav-logo" href="#" onclick="gotoPage(0);return false;">
+    <img class="nav-logo-img" id="navImg" src="Screenshot%202026-05-24%20115955.png" alt="Portrait">
+    <span class="nav-logo-name">[ Your Name ]</span>
+  </a>
+  <div class="nav-sep"></div>
+  <button class="nav-btn active" id="nb0" onclick="gotoPage(0)">Home</button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn" id="nb1" onclick="gotoPage(1)">About</button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn" id="nb2" onclick="gotoPage(2)">Skills</button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn" id="nb3" onclick="gotoPage(3)">Projects</button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn" id="nb4" onclick="gotoPage(4)">Certificates</button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn" id="nb5" onclick="gotoPage(5)">Contact</button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn nav-sound" id="soundToggle" type="button" aria-pressed="false">Sound On</button>
+</nav>
+
+<div class="page active" id="page-landing">
+  <div class="tw-bg-photo"></div>
+  <div class="tw-vignette"></div>
+  <div class="tw-top-shadow"></div>
+  <div class="dust" id="dust"></div>
+
+  <div class="landing-centre">
+    <div class="landing-profile">
+      <img class="landing-profile-img" src="Screenshot%202026-05-24%20115955.png" alt="Portrait of Your Name">
+      <div class="landing-profile-copy">
+        <div class="landing-name">[ Your Name ]</div>
+        <div class="landing-role">Software Engineer · Builder · Innovator</div>
+      </div>
+    </div>
+
+    <div class="landing-quote-block">
+      <div class="landing-quote-text" id="quoteText"></div>
+      <div class="landing-quote-attr" id="quoteAttr"></div>
+    </div>
+
+    <div class="tw-machine">
+      <div class="tw-paper-wrap">
+        <div class="tw-paper-sheet">
+          <div class="tw-paper-stain" style="top:4px;right:8px;width:55px;height:55px;"></div>
+          <div class="tw-paper-stain" style="bottom:2px;left:6px;width:38px;height:38px;"></div>
+          <div id="tw-typed-text"></div><span class="tw-cursor" id="twCursor"></span>
+        </div>
+      </div>
+      <img class="tw-ref-photo" id="twPhoto" src="1000_F_260067511_eJLJPkoOolpIVJY02br5z26OrrGta7e4.jpg" alt="Typewriter">
+    </div>
+
+    <div class="landing-hero" style="position:relative;">
+      <div class="cta-arrow-wrap" role="button" tabindex="0" onclick="gotoPage(1)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();gotoPage(1);}" style="cursor:pointer;">
+        <div class="cta-text">Click to view<br>portfolio</div>
+        <svg class="cta-arrow-svg" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 90 5 C 60 5, 10 20, 15 50 C 17 58, 25 58, 30 52" stroke="#f0e6cc" stroke-width="2.5" stroke-linecap="round" fill="none" />
+          <path d="M 20 45 L 30 52 L 22 58" stroke="#f0e6cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <div class="cta-sig">— Your Name</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="page" id="page-about">
+  <div class="paper-page">
+    <div class="paper-lines-overlay"></div>
+    <div class="paper-grain-overlay"></div>
+    <div class="cs" style="top:60px;right:80px;width:120px;height:120px;"></div>
+    <div class="cs" style="bottom:180px;left:40px;width:80px;height:80px;"></div>
+    <div class="cs" style="top:300px;right:160px;width:55px;height:55px;"></div>
+
+    <div class="page-content">
+      <div class="sec-header">
+        <span class="sec-num">§ 01</span>
+        <span class="sec-title">Letter</span>
+        <div class="sec-rule"></div>
+      </div>
+
+      <div class="letter-sheet">
+        <div class="letter-sheet-corner"></div>
+        <div class="letter-top">
+          <aside class="letter-portrait">
+            <img src="Screenshot%202026-05-24%20115955.png" alt="Portrait of Your Name">
+            <div class="letter-portrait-caption">Portrait / cropped from screenshot</div>
+          </aside>
+
+          <div class="letter-head">
+            <div class="letter-meta-row">
+              <span class="letter-meta-label">Date</span>
+              <span class="letter-meta-value">May 24, 2026</span>
+            </div>
+            <div class="letter-name-block">[ Your Name ]</div>
+            <div class="letter-role-block">Engineer</div>
+          </div>
+        </div>
+
+        <div class="letter-body">
+          <p>Dear reader,</p>
+          <p>I build software the way I like a letter to feel: deliberate, readable, and worth keeping. My work sits between engineering and composition — systems that hold together, interfaces that breathe, and details that feel human.</p>
+          <p>Over time, I’ve gravitated toward problem spaces where structure matters: data, products, tooling, and the quiet polish that makes a system feel complete. I care about clarity first, then longevity, then beauty.</p>
+          <p>If this resonates, I’d be glad to talk.</p>
+          <p class="letter-signature-line">Warmly,</p>
+          <p class="letter-signature-name">[ Your Name ]</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-skills">
+  <div class="paper-page">
+    <div class="paper-lines-overlay"></div>
+    <div class="paper-grain-overlay"></div>
+    <div class="cs" style="top:40px;left:90px;width:110px;height:110px;"></div>
+
+    <div class="page-content">
+      <div class="sec-header">
+        <span class="sec-num">§ 02</span>
+        <span class="sec-title">Skills</span>
+        <div class="sec-rule"></div>
+      </div>
+
+      <ul class="skills-list" id="skills-list">
+        <li class="skill-row"><span class="skill-bullet">•</span><span class="skill-name-col">Architecture</span><span class="skill-level">systems / APIs / data flow</span></li>
+        <li class="skill-row"><span class="skill-bullet">•</span><span class="skill-name-col">Interface craft</span><span class="skill-level">motion / UI / responsive composition</span></li>
+        <li class="skill-row"><span class="skill-bullet">•</span><span class="skill-name-col">Engineering taste</span><span class="skill-level">clean code / testing / debugging</span></li>
+        <li class="skill-row"><span class="skill-bullet">•</span><span class="skill-name-col">Tools</span><span class="skill-level">TypeScript / React / Node / APIs</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-projects">
+  <div class="paper-page">
+    <div class="paper-lines-overlay"></div>
+    <div class="paper-grain-overlay"></div>
+    <div class="cs" style="top:80px;right:120px;width:140px;height:140px;"></div>
+
+    <div class="page-content">
+      <div class="sec-header">
+        <span class="sec-num">§ 03</span>
+        <span class="sec-title">Projects</span>
+        <div class="sec-rule"></div>
+      </div>
+
+      <div class="projects-grid">
+        <article class="proj-card">
+          <div class="proj-num">01</div>
+          <div class="proj-title">Realtime systems dashboard</div>
+          <div class="proj-desc">Placeholder case study for observability, event flow, and clean operational visualizations.</div>
+          <div class="proj-tags"><span class="proj-tag">Frontend</span><span class="proj-tag">Data</span></div>
+        </article>
+        <article class="proj-card">
+          <div class="proj-num">02</div>
+          <div class="proj-title">Automation workflow suite</div>
+          <div class="proj-desc">Placeholder case study for reducing manual work with durable, reliable internal tools.</div>
+          <div class="proj-tags"><span class="proj-tag">Systems</span><span class="proj-tag">Automation</span></div>
+        </article>
+        <article class="proj-card">
+          <div class="proj-num">03</div>
+          <div class="proj-title">Experimental portfolio engine</div>
+          <div class="proj-desc">Placeholder case study for storytelling, motion, and an interface that feels like a physical object.</div>
+          <div class="proj-tags"><span class="proj-tag">Motion</span><span class="proj-tag">Design</span></div>
+        </article>
+        <article class="proj-card">
+          <div class="proj-num">04</div>
+          <div class="proj-title">Data delivery pipeline</div>
+          <div class="proj-desc">Placeholder case study for structured transfer, resilience, and simple operational control.</div>
+          <div class="proj-tags"><span class="proj-tag">ETL</span><span class="proj-tag">Cloud</span></div>
+        </article>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-certs">
+  <div class="paper-page">
+    <div class="paper-lines-overlay"></div>
+    <div class="paper-grain-overlay"></div>
+    <div class="cs" style="top:50px;left:130px;width:100px;height:100px;"></div>
+
+    <div class="page-content">
+      <div class="sec-header">
+        <span class="sec-num">§ 04</span>
+        <span class="sec-title">Certificates</span>
+        <div class="sec-rule"></div>
+      </div>
+
+      <ul class="certs-list">
+        <li class="cert-row"><div class="cert-top"><span class="cert-year">2025</span><span class="cert-title">Cloud foundation placeholder</span></div><div class="cert-issuer">Issuer name / replace with real credential</div></li>
+        <li class="cert-row"><div class="cert-top"><span class="cert-year">2024</span><span class="cert-title">System design placeholder</span></div><div class="cert-issuer">Issuer name / replace with real credential</div></li>
+        <li class="cert-row"><div class="cert-top"><span class="cert-year">2023</span><span class="cert-title">Engineering specialty placeholder</span></div><div class="cert-issuer">Issuer name / replace with real credential</div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-contact">
+  <div class="paper-page">
+    <div class="paper-lines-overlay"></div>
+    <div class="paper-grain-overlay"></div>
+    <div class="cs" style="top:80px;right:80px;width:120px;height:120px;"></div>
+
+    <div class="page-content">
+      <div class="sec-header">
+        <span class="sec-num">§ 05</span>
+        <span class="sec-title">Contact</span>
+        <div class="sec-rule"></div>
+      </div>
+
+      <div class="contact-letter">
+        If this portfolio feels like the right fit, I’d be glad to talk about software, systems, and thoughtful product work.
+      </div>
+
+      <ul class="contact-details">
+        <li><span class="label">Email</span><span class="contact-value">hello@yourname.com</span></li>
+        <li><span class="label">GitHub</span><span class="contact-value">github.com/yourname</span></li>
+        <li><span class="label">LinkedIn</span><span class="contact-value">linkedin.com/in/yourname</span></li>
+      </ul>
+
+      <div class="contact-signature">
+        <div class="sig-closing">Sincerely,</div>
+        <div class="sig-name">Your Name</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
