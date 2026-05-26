@@ -41,10 +41,14 @@ let transitionLock = false;
 let audioCtx = null;
 let soundEnabled = true;
 const typewriterAudioSources = {
-  key: ["assets/sounds/typewriter-ding-near-mono.wav"],
-  return: ["assets/sounds/typewriter-ding-near-mono.wav"],
+  key: ["assets/sounds/typewriter-key.ogg"],
+  return: ["assets/sounds/typewriter-return.ogg"],
 };
-const audioPools = {};
+const typewriterAudioState = {
+  buffers: {},
+  loading: {},
+  peaks: {},
+};
 const typingCache = {
   aboutParagraphs: aboutParagraphs.map((paragraph) => ({ element: paragraph, text: paragraph.textContent.trim() })),
   skillRows: skillRows.map((row) => ({
@@ -99,57 +103,128 @@ function getCtx() {
   return audioCtx;
 }
 
-function createAudioPool(urls) {
-  return urls.map((url) => {
-    const audio = new Audio(url);
-    audio.preload = "auto";
-    audio.volume = 0.25;
-    return audio;
-  });
+function getTypewriterSource(kind) {
+  const sources = typewriterAudioSources[kind] || [];
+  return sources[0] || null;
 }
 
-function getPooledAudio(kind) {
-  if (!audioPools[kind]) {
-    audioPools[kind] = createAudioPool(typewriterAudioSources[kind] || []);
+function buildPeakWindows(buffer, segmentSeconds) {
+  const sampleRate = buffer.sampleRate || 44100;
+  const segmentSize = Math.max(1, Math.floor(sampleRate * segmentSeconds));
+  const stepSize = Math.max(1, Math.floor(segmentSize * 0.35));
+  const data = buffer.getChannelData(0);
+  const peaks = [];
+
+  for (let start = 0; start + segmentSize <= data.length; start += stepSize) {
+    let energy = 0;
+    let peak = 0;
+
+    for (let index = start; index < start + segmentSize; index += 1) {
+      const value = Math.abs(data[index]);
+      energy += value;
+      if (value > peak) peak = value;
+    }
+
+    peaks.push({ start, score: energy / segmentSize + peak * 0.6 });
   }
 
-  const pool = audioPools[kind];
-  if (!pool.length) return null;
+  peaks.sort((left, right) => right.score - left.score);
+  return peaks.slice(0, 40).map((peak) => peak.start / sampleRate);
+}
 
-  const audio = pool.shift();
-  pool.push(audio);
-  return audio;
+async function loadTypewriterBuffer(kind) {
+  const source = getTypewriterSource(kind);
+  if (!source) return null;
+
+  if (typewriterAudioState.buffers[source]) return typewriterAudioState.buffers[source];
+  if (!typewriterAudioState.loading[source]) {
+    typewriterAudioState.loading[source] = (async () => {
+      try {
+        const response = await fetch(source, { cache: "force-cache" });
+        if (!response.ok) return null;
+        const arrayBuffer = await response.arrayBuffer();
+        const ctx = getCtx();
+        if (!ctx) return null;
+        const buffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
+        typewriterAudioState.buffers[source] = buffer;
+        typewriterAudioState.peaks[source] = buildPeakWindows(buffer, kind === "return" ? 0.12 : 0.07);
+        return buffer;
+      } catch {
+        return null;
+      }
+    })();
+  }
+
+  return typewriterAudioState.loading[source];
+}
+
+function warmTypewriterAudio() {
+  void loadTypewriterBuffer("key");
+  void loadTypewriterBuffer("return");
+}
+
+function pickTypewriterWindow(kind) {
+  const source = getTypewriterSource(kind);
+  if (!source) return null;
+  const peaks = typewriterAudioState.peaks[source] || [];
+  if (!peaks.length) return null;
+  return peaks[Math.floor(Math.random() * peaks.length)];
+}
+
+function playRecordedTypewriter(kind) {
+  const ctx = getCtx();
+  if (!ctx) return false;
+
+  const source = getTypewriterSource(kind);
+  const buffer = source ? typewriterAudioState.buffers[source] : null;
+  const start = pickTypewriterWindow(kind);
+  if (!buffer || start == null) return false;
+
+  const now = ctx.currentTime;
+  const segmentLength = kind === "return" ? 0.16 : 0.08;
+  const playbackRate = kind === "return" ? 0.92 + Math.random() * 0.06 : 1 + Math.random() * 0.1;
+  const maxStart = Math.max(0, buffer.duration - segmentLength - 0.01);
+  const segmentStart = Math.min(Math.max(0, start + (Math.random() - 0.5) * 0.018), maxStart);
+
+  const sourceNode = ctx.createBufferSource();
+  sourceNode.buffer = buffer;
+  sourceNode.playbackRate.value = playbackRate;
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = kind === "return" ? "bandpass" : "highpass";
+  filter.frequency.value = kind === "return" ? 1100 : 1700;
+  filter.Q.value = kind === "return" ? 0.8 : 0.9;
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(kind === "return" ? 0.16 : 0.09, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + segmentLength);
+
+  sourceNode.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+  sourceNode.start(now, segmentStart, segmentLength);
+  sourceNode.stop(now + segmentLength + 0.03);
+  return true;
 }
 
 function playSampleTypewriter(character = "") {
   const kind = character === "\n" ? "return" : "key";
-  const audio = getPooledAudio(kind);
-  if (!audio) return false;
-
-  try {
-    audio.currentTime = 0;
-    audio.volume = character === "\n" ? 0.38 : 0.18;
-    audio.playbackRate = character === "\n" ? 1 : 1.08 + Math.random() * 0.12;
-    const playResult = audio.play();
-    if (playResult && typeof playResult.catch === "function") {
-      playResult.catch(() => {});
-    }
-    return true;
-  } catch {
-    return false;
-  }
+  if (playRecordedTypewriter(kind)) return true;
+  void loadTypewriterBuffer(kind);
+  return false;
 }
 
 function playKeyClick() {
   const ctx = getCtx();
   if (!ctx) return;
-  const now = ctx.currentTime;
+  if (playRecordedTypewriter("key")) return;
 
-  const bufferSize = Math.floor(ctx.sampleRate * 0.012);
+  const now = ctx.currentTime;
+  const bufferSize = Math.floor(ctx.sampleRate * 0.014);
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
-    const envelope = Math.exp(-i / (bufferSize * 0.18));
+    const envelope = Math.exp(-i / (bufferSize * 0.16));
     data[i] = (Math.random() * 2 - 1) * envelope;
   }
   const noise = ctx.createBufferSource();
@@ -157,77 +232,46 @@ function playKeyClick() {
 
   const filter = ctx.createBiquadFilter();
   filter.type = "highpass";
-  filter.frequency.value = 1800 + Math.random() * 350;
+  filter.frequency.value = 1900 + Math.random() * 250;
   filter.Q.value = 0.9;
 
   const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0.02, now);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.018);
+  gain.gain.setValueAtTime(0.018, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02);
 
   noise.connect(filter);
   filter.connect(gain);
   gain.connect(ctx.destination);
   noise.start(now);
-
-  const body = ctx.createOscillator();
-  body.type = "sine";
-  body.frequency.setValueAtTime(165 + Math.random() * 25, now);
-  body.frequency.exponentialRampToValueAtTime(96 + Math.random() * 16, now + 0.028);
-  const bodyFilter = ctx.createBiquadFilter();
-  bodyFilter.type = "lowpass";
-  bodyFilter.frequency.value = 420;
-  const bodyGain = ctx.createGain();
-  bodyGain.gain.setValueAtTime(0.015, now);
-  bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
-  body.connect(bodyFilter);
-  bodyFilter.connect(bodyGain);
-  bodyGain.connect(ctx.destination);
-  body.start(now);
-
-  noise.stop(now + 0.02);
-  body.stop(now + 0.045);
+  noise.stop(now + 0.022);
 }
 
 function playReturn() {
   const ctx = getCtx();
   if (!ctx) return;
+  if (playRecordedTypewriter("return")) return;
+
   const now = ctx.currentTime;
-  const bufferSize = Math.floor(ctx.sampleRate * 0.025);
+  const bufferSize = Math.floor(ctx.sampleRate * 0.03);
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
-    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize) * 0.18;
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize) * 0.12;
   }
   const noise = ctx.createBufferSource();
   noise.buffer = buffer;
   const filter = ctx.createBiquadFilter();
   filter.type = "bandpass";
-  filter.frequency.value = 900 + Math.random() * 180;
-  filter.Q.value = 0.7;
+  filter.frequency.value = 850 + Math.random() * 140;
+  filter.Q.value = 0.75;
   const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0.03, now);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+  gain.gain.setValueAtTime(0.025, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
   noise.connect(filter);
   filter.connect(gain);
   gain.connect(ctx.destination);
   noise.start(now);
-  noise.stop(now + 0.03);
-
-  const slide = ctx.createOscillator();
-  slide.type = "triangle";
-  slide.frequency.setValueAtTime(140, now);
-  slide.frequency.exponentialRampToValueAtTime(90, now + 0.035);
-  const slideFilter = ctx.createBiquadFilter();
-  slideFilter.type = "lowpass";
-  slideFilter.frequency.value = 500;
-  const slideGain = ctx.createGain();
-  slideGain.gain.setValueAtTime(0.012, now);
-  slideGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
-  slide.connect(slideFilter);
-  slideFilter.connect(slideGain);
-  slideGain.connect(ctx.destination);
-  slide.start(now);
-  slide.stop(now + 0.045);
+  noise.stop(now + 0.035);
 }
 
 function playTypewriterSound(character = "") {
@@ -253,6 +297,7 @@ function toggleSound() {
   updateSoundToggle();
   if (soundEnabled) {
     getCtx();
+    warmTypewriterAudio();
   }
 }
 
@@ -565,6 +610,7 @@ window.addEventListener("keydown", (event) => {
 function startLandingType() {
   if (introStarted) return;
   introStarted = true;
+  warmTypewriterAudio();
   if (soundEnabled) getCtx();
   typeInto(typedText, introLines, 20);
 }
